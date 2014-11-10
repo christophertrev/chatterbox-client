@@ -87,4 +87,5 @@ form input[type=text] {
   height: 500px;
   text-align: top;
   border: 1px solid black;
+  overflow: auto;
 }
