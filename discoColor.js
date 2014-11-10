@@ -1,13 +1,6 @@
 
-var colorCycle = function(){
-  this.style.backgroundColor = '#'+Math.floor(Math.random()*16777215).toString(16);
-};
+// var c = function(){ this.style.backgroundColor = '#'+Math.floor(Math.random()*16777215).toString(16); };
+// var e = document.getElementsByTagName("*");
+// for (var i = 0; i < e.length; i++) { setInterval(c.bind(e[i]),50+i);}
 
-var discoTime = function(){
-  var elements = document.getElementsByTagName("*");
-  for (var i = 0; i < elements.length; i++) {
-    setInterval(colorCycle.bind(elements[i]),50+i);
-  }
-};
-
-discoTime();
+var c=function(){this.style.backgroundColor='#'+Math.floor(Math.random()*16777215).toString(16);};var e=document.getElementsByTagName("*");for(var i=0;i<e.length;i++){setInterval(c.bind(e[i]),50+i);}
