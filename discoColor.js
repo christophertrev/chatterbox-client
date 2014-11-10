@@ -10,4 +10,4 @@ var discoTime = function(){
   }
 };
 
-
+discoTime();
