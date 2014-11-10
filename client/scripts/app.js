@@ -9,14 +9,15 @@ var appendMessages = function(data){
   console.log(data);
   _.each(data.results, function(el){
     if (!messagesPosted[el.objectId]){
-      var tweet = $('<div>').text(el.text);
-      $('.chatWindow').append(tweet);
+    //console.log('posting New Message')
+       var tweet = $('<div>').text(el.text);
+       $('.chatWindow').append(tweet);
       messagesPosted[el.objectId]=true;
     }
   })
 }
 
-// var fetchMessages = function(){
+ var fetchMessages = function(){
   console.log('aquiring New BroTexts');
   $.ajax({
   // always use this url
@@ -29,8 +30,8 @@ var appendMessages = function(data){
       console.error('chatterbox: Failed to get message');
     }
   });
-// };
-
-// setInterval(fetchMessages,1000)
+ };
+//fetchMessages();
+setInterval(fetchMessages,1000)
 
 })
