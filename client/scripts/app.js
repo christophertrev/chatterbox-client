@@ -114,7 +114,7 @@ var filterByRoom = function(){
   messagesPosted = {};
   window.clearInterval(intervalID);
   fetchMessages(null,roomname,appendMessages);
-  intervalID = setInterval(fetchMessages.bind(null,roomname,null,appendMessages),5000)
+  intervalID = setInterval(fetchMessages.bind(null,null,roomnamer,appendMessages),5000)
 }
 
 })
