@@ -3,23 +3,33 @@
 
 $(document).ready(function(){
 
+  //Global Variables
+  var messagesPosted = {};
+  var userName = window.location.search.split('=')[1];
+  var roomFilter = null;
+  //var lastFetchTime = "2012-11-11T00:19:14.089Z";
 
-//Global Variables
-var messagesPosted = {};
-var username = window.location.search.split('=')[1];
-//var lastFetchTime = "2012-11-11T00:19:14.089Z";
+  var postMessage = function(string) {
+    var message = {
+    'username': userName,
+    'text': string,
+    'roomname': 'bouncyCastle 2.0'
+    };
 
-var appendMessages = function(data){
-  console.log(data)
-  _.each(data.results.reverse(), function(el){
-    if (!messagesPosted[el.objectId] && el.username!== 'MOOSE' && el.roomname!=='4chan'){
-      var tweet = $('<div>').text(el.createdAt + " " + el.username + ": " + el.text);
-      tweet.addClass('message')
-      $('.chatWindow').prepend(tweet);
-      messagesPosted[el.objectId]=true;
-    }
-  })
-}
+    $.ajax({
+      url:'https://api.parse.com/1/classes/chatterbox',
+      type: 'POST',
+      data: JSON.stringify(message),
+      contentType: 'application/json',
+      success: function(){
+        console.log('chatterbox: Message sent');
+      },
+      error: function (data) {
+      // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
+        console.error('chatterbox: Failed to post message');
+      }
+    });
+  };
 
  var fetchMessages = function(user,room,successCallback){
   var dataString = 'order=-createdAt'
@@ -38,84 +48,92 @@ var appendMessages = function(data){
     dataString += '}';
   }
 
-  console.log('fetching Massages')
-  $.ajax({
-  // always use this url
-    url: 'https://api.parse.com/1/classes/chatterbox',
-    type: 'GET',
-    //data:'where={"createdAt":{"$gt":'+lastFetchTime+'}}',
-//    data:'order=-createdAt&where={"username":"brian"}',
-     // data:JSON.stringify({ username:"brian" }),
-    data:dataString,
-  // data:'order=-createAt',
-    success: successCallback,
-    error: function (data) {
-    // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-      console.error('chatterbox: Failed to get message');
-    }
-  });
-  //lastFetchTime= (new Date()).toJSON();
- };
+    console.log('fetching Massages')
+    $.ajax({
+    // always use this url
+      url: 'https://api.parse.com/1/classes/chatterbox',
+      type: 'GET',
+      //data:'where={"createdAt":{"$gt":'+lastFetchTime+'}}',
+  //    data:'order=-createdAt&where={"username":"brian"}',
+       // data:JSON.stringify({ username:"brian" }),
+      data:dataString,
+    // data:'order=-createAt',
+      success: successCallback,
+      error: function (data) {
+      // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
+        console.error('chatterbox: Failed to get message');
+      }
+    });
+    //lastFetchTime= (new Date()).toJSON();
+   };
 
-var postMessage = function(string) {
-  var message = {
-  'username': username,
-  'text': string,
-  'roomname': 'bouncyCastle 2.0'
-  };
+  var fetchMessagesByRoom = function(roomName,successCallback){
+    fetchMessages(null, roomName, successCallback || appendMessages);
+  }
 
-  $.ajax({
-    url:'https://api.parse.com/1/classes/chatterbox',
-    type: 'POST',
-    data: JSON.stringify(message),
-    contentType: 'application/json',
-    success: function(){
-      console.log('chatterbox: Message sent');
-    },
-    error: function (data) {
-    // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-      console.error('chatterbox: Failed to post message');
-    }
-  });
-};
+  var fetchMessagesByUser = function(userName, successCallback){
+    fetchMessages(userName, null, successCallback || appendMessages);
+  } ;
 
-$('.newMessage').on('click',function(){
-  postMessage($('input').val());
-  $('input').val('');
-})
-
-fetchMessages(null,null,appendMessages);
-
-var intervalID = setInterval(fetchMessages.bind(null,null,null,appendMessages),5000)
-
-
-var fetchRooms = function(){
-  var buttons = {}
-  fetchMessages(null,null,function(data){
-    _.each(data.results,function(el){
-      if(!buttons[el.roomname]){
-        var $button = $('<button>')
-          .text(el.roomname)
-          .addClass('filterButton')
-          .on('click',filterByRoom);
-        $('.roomButtons').append($button);
-        buttons[el.roomname]=true;
+  var appendMessages = function(data){
+    console.log(data)
+    _.each(data.results.reverse(), function(el){
+      if (!messagesPosted[el.objectId] && el.username!== 'MOOSE' && el.roomname!=='4chan'){
+        var tweet = $('<div>').text(el.createdAt + " " + el.username + ": " + el.text + "   ---" + el.roomname);
+        tweet.addClass('message')
+        $('.chatWindow').prepend(tweet);
+        messagesPosted[el.objectId]=true;
       }
     })
+  }
+
+  var addRoomButtons = function(){
+    var buttons = {}
+    fetchMessages(null,null,function(data){
+      _.each(data.results,function(el){
+        if(!buttons[el.roomname] && el.roomname){
+          var $button = $('<button>')
+            .val(el.roomname)
+            .text(el.roomname)
+            .addClass('filterButton')
+            .on('click',filterByRoom);
+          $('.roomButtons').append($button);
+          buttons[el.roomname]=true;
+        }
+      })
+    })
+  };
+
+  var filterByRoom = function(){
+    var roomName = $(this).val();
+    $('.message').remove();
+    messagesPosted = {};
+    roomFilter = roomName;
+    fetchMessagesByRoom(roomName);
+    console.log(roomName===null);
+    // intervalID = setInterval(fetchMessages.bind(null,null,roomname,appendMessages),5000)
+  };
+
+
+
+  //add event listeners
+  $('.newMessage').on('click',function(){
+    postMessage($('input').val());
+    $('input').val('');
   })
-}
 
-fetchRooms();
+  $('#theOneButton').on('click',filterByRoom);
+
+  //create initial room buttons
+  addRoomButtons();
+
+  //get messages and set up automatic message fetching
+  fetchMessages(null,null,appendMessages);
+  setInterval(function(){
+    fetchMessagesByRoom(roomFilter)
+  },2000);
 
 
-var filterByRoom = function(){
-  var roomname = $(this).text();
-  $('.message').remove();
-  messagesPosted = {};
-  window.clearInterval(intervalID);
-  fetchMessages(null,roomname,appendMessages);
-  intervalID = setInterval(fetchMessages.bind(null,null,roomnamer,appendMessages),5000)
-}
 
 })
 
