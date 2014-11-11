@@ -89,3 +89,16 @@ form input[type=text] {
   border: 1px solid black;
   overflow: auto;
 }
+
+input {
+    margin-bottom: 10px;
+}
+
+button {
+    border-radius: 5px;
+}
+
+
+
+
+
