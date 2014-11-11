@@ -10,6 +10,8 @@ $(document).ready(function(){
   var friends = {};
 
   var scrubber = function(string){
+    //maybe change this to a scrubb object function
+    //return an object that has the same keys but different scrubed values?
     if(string){
       return string.replace(/[^a-z 0-9\?,.!@#$%^&*]/gi,'__');
     }
@@ -102,7 +104,8 @@ $(document).ready(function(){
       $userName.addClass('friend')
     }
 
-    $message.append($timeStamp)
+    $message
+        .append($timeStamp)
         .append(':  ')
         .append($userName)
         .append(' ')
@@ -113,7 +116,7 @@ $(document).ready(function(){
   };
 
   var addRoomButtons = function(){
-    var buttons = {}
+    var buttons = {};
     fetchMessages(null,null,function(data){
       _.each(data.results,function(el){
         if(!buttons[el.roomname] && el.roomname){
