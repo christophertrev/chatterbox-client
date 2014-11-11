@@ -12,15 +12,16 @@ var username = window.location.search.split('=')[1];
 var appendMessages = function(data){
   console.log(data)
   _.each(data.results.reverse(), function(el){
-    if (!messagesPosted[el.objectId]){
-       var tweet = $('<div>').text(el.createdAt + " " + el.username + ": " + el.text);
-       $('.chatWindow').prepend(tweet);
+    if (!messagesPosted[el.objectId] && el.username!== 'MOOSE' && el.roomname!=='4chan'){
+      var tweet = $('<div>').text(el.createdAt + " " + el.username + ": " + el.text);
+      tweet.addClass('message')
+      $('.chatWindow').prepend(tweet);
       messagesPosted[el.objectId]=true;
     }
   })
 }
 
- var fetchMessages = function(user,room){
+ var fetchMessages = function(user,room,successCallback){
   var dataString = 'order=-createdAt'
 
   if(user || room){
@@ -37,9 +38,6 @@ var appendMessages = function(data){
     dataString += '}';
   }
 
-  debugger;
-
-
   console.log('fetching Massages')
   $.ajax({
   // always use this url
@@ -50,7 +48,7 @@ var appendMessages = function(data){
      // data:JSON.stringify({ username:"brian" }),
     data:dataString,
   // data:'order=-createAt',
-    success: appendMessages,
+    success: successCallback,
     error: function (data) {
     // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
       console.error('chatterbox: Failed to get message');
@@ -81,13 +79,43 @@ var postMessage = function(string) {
   });
 };
 
-$('button').on('click',function(){
+$('.newMessage').on('click',function(){
   postMessage($('input').val());
   $('input').val('');
 })
 
-fetchMessages('brian');
-//setInterval(fetchMessages,5000)
+fetchMessages(null,null,appendMessages);
+
+var intervalID = setInterval(fetchMessages.bind(null,null,null,appendMessages),5000)
+
+
+var fetchRooms = function(){
+  var buttons = {}
+  fetchMessages(null,null,function(data){
+    _.each(data.results,function(el){
+      if(!buttons[el.roomname]){
+        var $button = $('<button>')
+          .text(el.roomname)
+          .addClass('filterButton')
+          .on('click',filterByRoom);
+        $('.roomButtons').append($button);
+        buttons[el.roomname]=true;
+      }
+    })
+  })
+}
+
+fetchRooms();
+
+
+var filterByRoom = function(){
+  var roomname = $(this).text();
+  $('.message').remove();
+  messagesPosted = {};
+  window.clearInterval(intervalID);
+  fetchMessages(null,roomname,appendMessages);
+  intervalID = setInterval(fetchMessages.bind(null,roomname,null,appendMessages),5000)
+}
 
 })
 

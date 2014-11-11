@@ -94,8 +94,13 @@ input {
     margin-bottom: 10px;
 }
 
-button {
+.filterButton {
+    float: left;
     border-radius: 5px;
+    width: 70px;
+    height: 40px;
+    overflow: hidden;
+    margin-bottom: 10px;
 }
 
 
