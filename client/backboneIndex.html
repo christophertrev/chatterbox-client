@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>chatterbox</title>
+    <link rel="stylesheet" href="styles/styles.css">
+
+    <!-- dependencies -->
+    <script src="bower_components/jquery/jquery.min.js"></script>
+    <script src="bower_components/underscore/underscore-min.js"></script>
+    <script src="bower_components/backbone/backbone.js"></script>
+    <!-- your scripts -->
+    <script src="env/config.js"></script>
+    <script src="scripts/backboneApp.js"></script>
+  </head>
+  <body>
+    <div class="main">
+      <h1>chatterbox</h1>
+      <input class="input" value='new Message'>
+      <input class="roomName" value = 'Room'>
+      <button class="newMessage">clicky</button>
+      <div>Filter by Room:</div>
+      <div class="roomButtons">
+        <button class="filterButton" id="allRoomsButton">All Rooms</button>
+      </div>
+      <!-- <div class="userButtons">Filter by User:</div> -->
+      <div class='chatWindow'></div>
+    </div>
+    <script>
+    $(function(){
+      void 0;
+    });
+
+
+    </script>
+  </body>
+</html>
