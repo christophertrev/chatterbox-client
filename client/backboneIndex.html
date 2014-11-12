@@ -27,11 +27,13 @@
       <div class='chatWindow'></div>
     </div>
     <script>
-    $(function(){
-      void 0;
-    });
+      $(function(){
+        var messages = new Messages();
+        messages.fetchMessages();
 
 
+
+      });
     </script>
   </body>
 </html>
