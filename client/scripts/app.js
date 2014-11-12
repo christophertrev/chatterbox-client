@@ -3,26 +3,31 @@
 
 $(document).ready(function(){
 
-  //Global Variables
+  //session Variables
   var messagesPosted = {};
   var userName = window.location.search.split('=')[1];
   var roomFilter = null;
   var friends = {};
 
-  var scrubber = function(string){
-    //maybe change this to a scrubb object function
-    //return an object that has the same keys but different scrubed values?
+  var scrubString = function(string){
     if(string){
       return string.replace(/[^a-z 0-9\?,.!@#$%^&*]/gi,'__');
     }
-    return 'undefined'
+    return 'undefined';
+  }
+
+  var scrubMsgObj = function(obj){
+    obj.username = scrubString(obj.username);
+    obj.roomname = scrubString(obj.roomname);
+    obj.text  = scrubString(obj.text);
+    return obj;
   }
 
   var postMessage = function(string) {
     var message = {
     'username': userName,
     'text': string,
-    'roomname': 'bouncyCastle 2.0'
+    'roomname': $('.roomName').val()
     };
 
     $.ajax({
@@ -56,7 +61,6 @@ $(document).ready(function(){
     dataString += '}';
   }
 
-    console.log('fetching Massages')
     $.ajax({
       url: 'https://api.parse.com/1/classes/chatterbox',
       type: 'GET',
@@ -72,36 +76,42 @@ $(document).ready(function(){
 
   var fetchMessagesByRoom = function(roomName,successCallback){
     fetchMessages(null, roomName, successCallback || appendMessages);
-  }
+  };
 
   var fetchMessagesByUser = function(userName, successCallback){
     fetchMessages(userName, null, successCallback || appendMessages);
-  } ;
+  };
 
   var appendMessages = function(data){
-    console.log(data)
     _.each(data.results.reverse(), function(el){
       if (!messagesPosted[el.objectId] && el.username!== 'MOOSE' && el.roomname!=='4chan'){
+        el = scrubMsgObj(el);
         var $message = getMessageNode(el);
         $('.chatWindow').prepend($message);
         messagesPosted[el.objectId]=true;
       }
     })
   }
+
+  var toggleHighlightFriend = function(userName){
+    if(!friends[userName]){
+      friends[userName] = true;
+    }else{
+      friends[userName] = false;
+    }
+    $('.userName:contains('+userName+')').toggleClass('friend')
+  }
   var getMessageNode = function(msgObject){
     var $message = $('<div>').addClass('message');
-    var $userName = $('<span>').text(scrubber(msgObject.username))
-            .addClass('userName').on('click',function(){
-              friends[scrubber(msgObject.username)]=true;
-              console.log(friends);
-              $('.userName:contains('+$userName.text()+')').addClass('friend')
-            }); // this could be refactored out for clarity?
+    var $userName = $('<span>').text(msgObject.username)
+            .addClass('userName').on('click',toggleHighlightFriend.bind(null,msgObject.username)); // this could be refactored out for clarity?
     var $timeStamp = $('<span>').text((new Date(msgObject.createdAt).toLocaleTimeString())) //this could also be refatored out for clarity
             .addClass('timeStamp');
-    var $roomName = $('<span>').text(scrubber(msgObject.roomname))
+    var $roomName = $('<span>').text(msgObject.roomname)
             .addClass('roomName');
+
     if(friends[$userName.text()]){
-      $userName.addClass('friend')
+      $userName.addClass('friend');
     }
 
     $message
@@ -109,10 +119,10 @@ $(document).ready(function(){
         .append(':  ')
         .append($userName)
         .append(' ')
-        .append(scrubber(msgObject.text))
-        .append('              --')
-        .append($roomName)
-    return $message
+        .append(msgObject.text)
+        .append(' --')
+        .append($roomName);
+    return $message;
   };
 
   var addRoomButtons = function(){
@@ -138,18 +148,17 @@ $(document).ready(function(){
     messagesPosted = {};
     roomFilter = roomName;
     fetchMessagesByRoom(roomName);
-    console.log(roomName===null);
   };
 
 
 
   //add event listeners
   $('.newMessage').on('click',function(){
-    postMessage($('input').val());
-    $('input').val('');
+    postMessage($('.input').val());
+    $('.input').val('');
   })
 
-  $('#theOneButton').on('click',filterByRoom);
+  $('#allRoomsButton').on('click',filterByRoom);
 
   //create initial room buttons
   addRoomButtons();

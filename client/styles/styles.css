@@ -97,10 +97,20 @@ input {
 .filterButton {
     float: left;
     border-radius: 5px;
-    width: 70px;
-    height: 40px;
+    width: 90px;
+    height: 34px;
     overflow: hidden;
     margin-bottom: 10px;
+    margin-right: 5px;
+    background-color: #0099FF;
+
+}
+
+/* Color Highlight for keyboard navigation */
+.filterButton:focus {
+  outline: none;
+  border-color: #0089cb;
+  background-color: #0066CC;
 }
 
 .friend {
