@@ -13,8 +13,6 @@ var Messages = Backbone.Collection.extend( {
   }
 } );
 
-var messages = new Messages();
-messages.fetchMessages();
 
 //render messages from server
 
